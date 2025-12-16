@@ -1,3 +1,3 @@
 <template>
-  <h1 class="p-2">Dashboard Analytics</h1>
+  <h1>Dashboard</h1>
 </template>
