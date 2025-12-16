@@ -3,5 +3,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: true,
-  modules: ['@nuxt/eslint', '@pinia/nuxt'],
+  modules: [
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@pinia/nuxt',
+  ],
+  css: ['~/assets/css/main.css'],
 });
