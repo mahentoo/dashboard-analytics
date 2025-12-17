@@ -18,6 +18,13 @@ export interface Pagination {
     total: number;
 }
 
+export interface TimeSeriesResponse {
+    series: {
+        labels: string[];
+        values: number[];
+    };
+}
+
 export interface Transaction {
     id: string;
     customer: string;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MetricsResponse } from '~/types/analytics';
+import type { MetricsResponse, TimeSeriesResponse } from '~/types/analytics';
 
 const periodStore = usePeriodStore();
 const { period } = storeToRefs(periodStore);
@@ -13,8 +13,22 @@ const { data: metricsData, status } = await useFetch<MetricsResponse>(
   },
 );
 
+const { data: timeSeriesData, status: timeSeriesStatus } = await useFetch<TimeSeriesResponse>(
+  '/api/timeSeries',
+  {
+    query: { period },
+    watch: [period],
+  },
+);
+
+const chartLoading = computed(() => timeSeriesStatus.value === 'pending');
 const loading = computed(() => status.value === 'pending');
 const metrics = computed(() => metricsData.value?.metrics);
+const series = computed(() => timeSeriesData.value?.series);
+
+const RevenueLineChart = defineAsyncComponent(
+  () => import('~/components/dashboard/RevenueLineChart.client.vue'),
+);
 </script>
 
 <template>
@@ -51,5 +65,17 @@ const metrics = computed(() => metricsData.value?.metrics);
         :value="metrics ? `${metrics.growthRate}%` : '-'"
       />
     </div>
+    <ClientOnly>
+      <RevenueLineChart
+        :labels="series?.labels ?? []"
+        :loading="chartLoading"
+        :values="series?.values ?? []"
+      />
+      <template #fallback>
+        <UCard>
+          <USkeleton class="h-64 w-full" />
+        </UCard>
+      </template>
+    </ClientOnly>
   </div>
 </template>
