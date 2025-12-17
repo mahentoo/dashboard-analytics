@@ -1,5 +1,6 @@
 <script setup lang="ts">
 defineProps<{
+  icon?: string;
   loading?: boolean;
   title: string;
   value: string | number;
@@ -23,6 +24,15 @@ defineProps<{
         >
           {{ value }}
         </p>
+      </div>
+      <div
+        v-if="icon"
+        class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600"
+      >
+        <UIcon
+          class="h-6 w-6"
+          :name="icon"
+        />
       </div>
     </div>
   </UCard>
