@@ -4,12 +4,18 @@ import type { TransactionsResponse } from '~/types/analytics';
 const periodStore = usePeriodStore();
 const { period } = storeToRefs(periodStore);
 
+const search = ref('');
+const debouncedSearch = useDebounce(search, 300);
+
 const { data, status } = await useFetch<TransactionsResponse>(
   '/api/transactions',
   {
     lazy: true,
-    query: { period },
-    watch: [period],
+    query: {
+      period,
+      q: debouncedSearch,
+    },
+    watch: [period, debouncedSearch],
   },
 );
 
@@ -39,11 +45,19 @@ const columns = [
 
 <template>
   <div class="space-y-6">
-    <div>
-      <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Transações</h1>
-      <p class="mt-1 text-sm text-neutral-500">
-        {{ transactions.length }} transações nos últimos {{ period }} dias
-      </p>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Transações</h1>
+        <p class="mt-1 text-sm text-neutral-500">
+          {{ transactions.length }} transações nos últimos {{ period }} dias
+        </p>
+      </div>
+      <UInput
+        v-model="search"
+        class="w-64"
+        icon="i-heroicons-magnifying-glass"
+        placeholder="Buscar por ID ou cliente..."
+      />
     </div>
     <UCard>
       <div

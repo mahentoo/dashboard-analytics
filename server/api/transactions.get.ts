@@ -73,12 +73,21 @@ const allTransactions = generateItems();
 export default defineEventHandler(event => {
   const query = getQuery(event);
   const period = clampPeriod(query.period);
+  const q = typeof query.q === 'string' ? query.q.trim().toLowerCase() : '';
 
   const now = new Date();
   now.setHours(23, 59, 59, 999);
   const cutoffDate = new Date(now.getTime() - period * MS_PER_DAY);
 
+  let transactions = allTransactions.filter(t => new Date(t.createdAt) >= cutoffDate);
+
+  if (q) {
+    transactions = transactions.filter(
+      t => t.id.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q),
+    );
+  }
+
   return {
-    transactions: allTransactions.filter(t => new Date(t.createdAt) >= cutoffDate),
+    transactions,
   };
 });
