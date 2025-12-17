@@ -6,20 +6,29 @@ const { period } = storeToRefs(periodStore);
 
 const search = ref('');
 const debouncedSearch = useDebounce(search, 300);
+const page = ref(1);
+const perPage = 12;
 
 const { data, status } = await useFetch<TransactionsResponse>(
   '/api/transactions',
   {
     lazy: true,
     query: {
+      page,
+      perPage,
       period,
       q: debouncedSearch,
     },
-    watch: [period, debouncedSearch],
+    watch: [
+      debouncedSearch,
+      page,
+      period,
+    ],
   },
 );
 
 const loading = computed(() => status.value === 'pending');
+const pagination = computed(() => data.value?.meta);
 const transactions = computed(() => data.value?.transactions ?? []);
 
 const statusColors = {
@@ -41,6 +50,10 @@ const columns = [
   { key: 'status', label: 'Status' },
   { key: 'createdAt', label: 'Data' },
 ];
+
+watch([debouncedSearch, period], () => {
+  page.value = 1;
+});
 </script>
 
 <template>
@@ -49,7 +62,7 @@ const columns = [
       <div>
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Transações</h1>
         <p class="mt-1 text-sm text-neutral-500">
-          {{ transactions.length }} transações nos últimos {{ period }} dias
+          {{ pagination?.total ?? 0 }} transações nos últimos {{ period }} dias
         </p>
       </div>
       <UInput
@@ -122,6 +135,22 @@ const columns = [
           </tr>
         </tbody>
       </table>
+      <template
+        v-if="(pagination?.lastPage ?? 0) > 1"
+        #footer
+      >
+        <div class="flex items-center justify-between border-t border-neutral-200 px-4 py-3 dark:border-neutral-800">
+          <p class="text-sm text-neutral-500">
+            Página {{ pagination?.currentPage ?? 1 }} de {{ pagination?.lastPage ?? 1 }}
+            ({{ pagination?.total ?? 0 }} itens)
+          </p>
+          <UPagination
+            v-model:page="page"
+            :items-per-page="perPage"
+            :total="pagination?.total ?? 0"
+          />
+        </div>
+      </template>
     </UCard>
   </div>
 </template>

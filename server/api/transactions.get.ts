@@ -74,20 +74,34 @@ export default defineEventHandler(event => {
   const query = getQuery(event);
   const period = clampPeriod(query.period);
   const q = typeof query.q === 'string' ? query.q.trim().toLowerCase() : '';
+  const page = Math.max(1, Number(query.page) || 1);
+  const perPage = Math.min(50, Math.max(1, Number(query.perPage) || 10));
 
   const now = new Date();
   now.setHours(23, 59, 59, 999);
   const cutoffDate = new Date(now.getTime() - period * MS_PER_DAY);
 
-  let transactions = allTransactions.filter(t => new Date(t.createdAt) >= cutoffDate);
+  let filtered = allTransactions.filter(t => new Date(t.createdAt) >= cutoffDate);
 
   if (q) {
-    transactions = transactions.filter(
+    filtered = filtered.filter(
       t => t.id.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q),
     );
   }
 
+  const total = filtered.length;
+  const lastPage = Math.max(1, Math.ceil(total / perPage));
+  const currentPage = Math.min(page, lastPage);
+  const offset = (currentPage - 1) * perPage;
+  const transactions = filtered.slice(offset, offset + perPage);
+
   return {
+    meta: {
+      currentPage,
+      lastPage,
+      perPage,
+      total,
+    },
     transactions,
   };
 });

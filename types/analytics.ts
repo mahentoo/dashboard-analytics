@@ -11,6 +11,13 @@ export interface MetricsResponse {
     metrics: Metric;
 }
 
+export interface Pagination {
+    currentPage: number;
+    lastPage: number;
+    perPage: number;
+    total: number;
+}
+
 export interface Transaction {
     id: string;
     customer: string;
@@ -20,5 +27,6 @@ export interface Transaction {
 }
 
 export interface TransactionsResponse {
+    meta: Pagination,
     transactions: Transaction[];
 }
