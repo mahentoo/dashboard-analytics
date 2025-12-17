@@ -11,7 +11,7 @@ const links = [
   },
   {
     label: 'Transações',
-    to: '/list',
+    to: '/transactions',
     icon: 'i-heroicons-table-cells',
   },
 ];

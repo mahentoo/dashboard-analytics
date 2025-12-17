@@ -8,3 +8,15 @@ export interface Metric {
 export interface MetricsResponse {
     metrics: Metric;
 }
+
+export interface Transaction {
+    id: string;
+    customer: string;
+    amount: number;
+    status: 'pending' | 'paid' | 'failed';
+    createdAt: string;
+}
+
+export interface TransactionsResponse {
+    transactions: Transaction[];
+}
