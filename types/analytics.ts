@@ -1,3 +1,5 @@
+export type Period = 7 | 30 | 90;
+
 export interface Metric {
     activeUsers: number;
     revenue: number;

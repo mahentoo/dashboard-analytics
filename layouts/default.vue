@@ -52,6 +52,7 @@ watch(() => route.path, () => {
             </NuxtLink>
           </nav>
         </div>
+        <UiPeriodFilter />
       </div>
       <div
         v-if="mobileMenuOpen"

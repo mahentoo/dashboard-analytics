@@ -1,3 +1,10 @@
+const clampPeriod = (periodRaw: unknown): 7 | 30 | 90 => {
+  const raw = Array.isArray(periodRaw) ? periodRaw[0] : periodRaw;
+  if (raw === '30' || raw === 30) return 30;
+  if (raw === '90' || raw === 90) return 90;
+  return 7;
+};
+
 const makeName = (i: number): string => {
   const first = [
     'Ana',
@@ -61,6 +68,17 @@ const generateItems = () => {
   return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 };
 
-const allItems = generateItems();
+const allTransactions = generateItems();
 
-export default defineEventHandler(() => ({ transactions: allItems }));
+export default defineEventHandler(event => {
+  const query = getQuery(event);
+  const period = clampPeriod(query.period);
+
+  const now = new Date();
+  now.setHours(23, 59, 59, 999);
+  const cutoffDate = new Date(now.getTime() - period * MS_PER_DAY);
+
+  return {
+    transactions: allTransactions.filter(t => new Date(t.createdAt) >= cutoffDate),
+  };
+});

@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import type { MetricsResponse } from '~/types/analytics';
 
+const periodStore = usePeriodStore();
+const { period } = storeToRefs(periodStore);
+
 const { data: metricsData, status } = await useFetch<MetricsResponse>(
   '/api/metrics',
   {
     lazy: true,
+    query: { period },
+    watch: [period],
   },
 );
 
@@ -14,7 +19,12 @@ const metrics = computed(() => metricsData.value?.metrics);
 
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Dashboard</h1>
+    <div>
+      <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Dashboard</h1>
+      <p class="mt-1 text-sm text-neutral-500">
+        Métricas dos últimos {{ period }} dias
+      </p>
+    </div>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <UiMetricCard
         icon="i-heroicons-users"

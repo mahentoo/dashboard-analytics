@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import type { TransactionsResponse } from '~/types/analytics';
 
+const periodStore = usePeriodStore();
+const { period } = storeToRefs(periodStore);
+
 const { data, status } = await useFetch<TransactionsResponse>(
   '/api/transactions',
   {
     lazy: true,
+    query: { period },
+    watch: [period],
   },
 );
 
@@ -34,7 +39,12 @@ const columns = [
 
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Transações</h1>
+    <div>
+      <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Transações</h1>
+      <p class="mt-1 text-sm text-neutral-500">
+        {{ transactions.length }} transações nos últimos {{ period }} dias
+      </p>
+    </div>
     <UCard>
       <div
         v-if="loading"
