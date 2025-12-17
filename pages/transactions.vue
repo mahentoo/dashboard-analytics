@@ -9,7 +9,12 @@ const debouncedSearch = useDebounce(search, 300);
 const page = ref(1);
 const perPage = 12;
 
-const { data, status } = await useFetch<TransactionsResponse>(
+const {
+  data,
+  status,
+  error,
+  refresh,
+} = await useFetch<TransactionsResponse>(
   '/api/transactions',
   {
     lazy: true,
@@ -28,6 +33,7 @@ const { data, status } = await useFetch<TransactionsResponse>(
 );
 
 const loading = computed(() => status.value === 'pending');
+const hasError = computed(() => Boolean(error.value));
 const pagination = computed(() => data.value?.meta);
 const transactions = computed(() => data.value?.transactions ?? []);
 
@@ -82,6 +88,28 @@ watch([debouncedSearch, period], () => {
           :key="i"
           class="h-12 w-full"
         />
+      </div>
+      <div
+        v-else-if="hasError"
+        class="p-6"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-neutral-900 dark:text-white">
+              Não foi possível carregar as transações.
+            </p>
+            <p class="mt-1 text-sm text-neutral-500">
+              Tente novamente em instantes.
+            </p>
+          </div>
+          <UButton
+            color="primary"
+            variant="solid"
+            @click="refresh"
+          >
+            Tentar novamente
+          </UButton>
+        </div>
       </div>
       <table
         v-else

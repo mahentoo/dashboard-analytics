@@ -4,7 +4,12 @@ import type { MetricsResponse, TimeSeriesResponse } from '~/types/analytics';
 const periodStore = usePeriodStore();
 const { period } = storeToRefs(periodStore);
 
-const { data: metricsData, status } = await useFetch<MetricsResponse>(
+const {
+  data: metricsData,
+  status,
+  error: metricsError,
+  refresh: refreshMetrics,
+} = await useFetch<MetricsResponse>(
   '/api/metrics',
   {
     lazy: true,
@@ -13,7 +18,12 @@ const { data: metricsData, status } = await useFetch<MetricsResponse>(
   },
 );
 
-const { data: timeSeriesData, status: timeSeriesStatus } = await useFetch<TimeSeriesResponse>(
+const {
+  data: timeSeriesData,
+  status: timeSeriesStatus,
+  error: timeSeriesError,
+  refresh: refreshTimeSeries,
+} = await useFetch<TimeSeriesResponse>(
   '/api/timeSeries',
   {
     query: { period },
@@ -25,6 +35,13 @@ const chartLoading = computed(() => timeSeriesStatus.value === 'pending');
 const loading = computed(() => status.value === 'pending');
 const metrics = computed(() => metricsData.value?.metrics);
 const series = computed(() => timeSeriesData.value?.series);
+
+const hasError = computed(() => Boolean(metricsError.value || timeSeriesError.value));
+
+const retry = () => {
+  refreshMetrics();
+  refreshTimeSeries();
+};
 
 const RevenueLineChart = defineAsyncComponent(
   () => import('~/components/dashboard/RevenueLineChart.client.vue'),
@@ -39,6 +56,25 @@ const RevenueLineChart = defineAsyncComponent(
         Métricas dos últimos {{ period }} dias
       </p>
     </div>
+    <UCard v-if="hasError">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-semibold text-neutral-900 dark:text-white">
+            Não foi possível carregar os dados.
+          </p>
+          <p class="mt-1 text-sm text-neutral-500">
+            Verifique sua conexão e tente novamente.
+          </p>
+        </div>
+        <UButton
+          color="primary"
+          variant="solid"
+          @click="retry"
+        >
+          Tentar novamente
+        </UButton>
+      </div>
+    </UCard>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <UiMetricCard
         icon="i-heroicons-users"
